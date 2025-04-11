@@ -24,6 +24,12 @@ func (r *UserRepository) FindByEmail(email string) (*models.User, error) {
 	return &user, err
 }
 
+func (r *UserRepository) FindById(id string) (*models.User, error) {
+	var user models.User
+	err := r.db.First(&user, "id = ?", id).Error
+	return &user, err
+}
+
 func (r *UserRepository) Delete(id uuid.UUID) error {
 	return r.db.Delete(&models.User{}, "id = ?", id).Error
 }

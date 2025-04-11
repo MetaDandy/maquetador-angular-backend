@@ -67,3 +67,18 @@ func (s *UserService) Login(req dtos.LoginRequest) (*dtos.LoginResponse, error) 
 	}, nil
 
 }
+
+func (s *UserService) FindUserById(id string) (*dtos.UserResponse, error) {
+	user, err := s.userRepo.FindById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dtos.UserResponse{
+		ID:        id,
+		Name:      user.Name,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt.Format(time.RFC3339),
+		UpdatedAt: user.CreatedAt.Format(time.RFC3339),
+	}, nil
+}
