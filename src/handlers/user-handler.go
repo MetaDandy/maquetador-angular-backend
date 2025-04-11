@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/MetaDandy/maquetador-angular-backend/pkg"
 	"github.com/MetaDandy/maquetador-angular-backend/src/dtos"
 	"github.com/MetaDandy/maquetador-angular-backend/src/services"
 	"github.com/gofiber/fiber/v2"
@@ -19,6 +20,9 @@ func NewUserHandler(userService *services.UserService) *UserHandler {
 func (h *UserHandler) RegisterUserRoutes(router fiber.Router) {
 	router.Post("/user/register", h.CreateUser)
 	router.Post("/login", h.Login)
+	router.Get("/", h.FindAll)
+	router.Get("/:id", h.FindById)
+	router.Delete("/:id", h.Delete)
 }
 
 func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
@@ -26,6 +30,7 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid request body",
+			"err":   err,
 		})
 	}
 
@@ -33,11 +38,68 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to create user",
+			"err":   err,
 		})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "User created successfully",
+		"data":    user,
+	})
+}
+
+func (h *UserHandler) FindAll(c *fiber.Ctx) error {
+	opts := pkg.NewFindAllOptionsFromQuery(c)
+
+	users, err := h.userService.GetAllUsers(opts)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to obtein users",
+			"err":   err,
+		})
+	}
+
+	return c.JSON(users)
+}
+
+func (h *UserHandler) FindById(c *fiber.Ctx) error {
+	id := c.Params("id")
+	user, err := h.userService.FindUserById(id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to find user",
+			"err":   err,
+		})
+	}
+	if user == nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "No user finded",
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"message": "User finded successfully",
+		"data":    user,
+	})
+}
+
+func (h *UserHandler) Delete(c *fiber.Ctx) error {
+	id := c.Params("id")
+	user, err := h.userService.Delete(id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to find user",
+			"err":   err,
+		})
+	}
+	if user == nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "No user finded",
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"message": "User deleted successfully",
 		"data":    user,
 	})
 }

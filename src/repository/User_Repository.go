@@ -1,8 +1,9 @@
 package repository
 
 import (
+	"github.com/MetaDandy/maquetador-angular-backend/pkg"
+	"github.com/MetaDandy/maquetador-angular-backend/src/dtos"
 	"github.com/MetaDandy/maquetador-angular-backend/src/models"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -30,6 +31,16 @@ func (r *UserRepository) FindById(id string) (*models.User, error) {
 	return &user, err
 }
 
-func (r *UserRepository) Delete(id uuid.UUID) error {
+func (c *UserRepository) FindAll(opts *dtos.FindAllDto) ([]models.User, int64, error) {
+	var users []models.User
+	query := c.db.Model(models.User{})
+	var total int64
+	query, total = pkg.ApplyFindAllOptions(query, opts)
+
+	err := query.Find(&users).Error
+	return users, total, err
+}
+
+func (r *UserRepository) Delete(id string) error {
 	return r.db.Delete(&models.User{}, "id = ?", id).Error
 }

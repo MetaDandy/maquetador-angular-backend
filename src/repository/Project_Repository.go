@@ -4,7 +4,6 @@ import (
 	"github.com/MetaDandy/maquetador-angular-backend/pkg"
 	"github.com/MetaDandy/maquetador-angular-backend/src/dtos"
 	"github.com/MetaDandy/maquetador-angular-backend/src/models"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -18,6 +17,12 @@ func NewProjectRepositories(db *gorm.DB) *ProjectRepositories {
 
 func (r *ProjectRepositories) CreateRepository(project *models.Project) error {
 	return r.db.Create(project).Error
+}
+
+func (r *ProjectRepositories) FindByID(id string) (*models.Project, error) {
+	var project models.Project
+	err := r.db.First(&project, "id = ?", id).Error
+	return &project, err
 }
 
 func (r *ProjectRepositories) FindByTitles(title string) (*models.Project, error) {
@@ -40,6 +45,6 @@ func (r *ProjectRepositories) UpdateRepostory(project *models.Project) error {
 	return r.db.Save(project).Error
 }
 
-func (r *ProjectRepositories) DeleteRepositories(id uuid.UUID) error {
+func (r *ProjectRepositories) Delete(id string) error {
 	return r.db.Delete(&models.Project{}, "id = ?", id).Error
 }

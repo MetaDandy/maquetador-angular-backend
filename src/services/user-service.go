@@ -82,3 +82,48 @@ func (s *UserService) FindUserById(id string) (*dtos.UserResponse, error) {
 		UpdatedAt: user.CreatedAt.Format(time.RFC3339),
 	}, nil
 }
+
+func (s *UserService) FindByEmail(email string) (*dtos.UserResponse, error) {
+	user, err := s.userRepo.FindById(email)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dtos.UserResponse{
+		ID:        user.Email,
+		Name:      user.Name,
+		Email:     email,
+		CreatedAt: user.CreatedAt.Format(time.RFC3339),
+		UpdatedAt: user.CreatedAt.Format(time.RFC3339),
+	}, nil
+}
+
+func (s *UserService) GetAllUsers(opts *dtos.FindAllDto) (*dtos.PaginatedResponse[models.User], error) {
+	data, total, err := s.userRepo.FindAll(opts)
+	if err != nil {
+		return nil, err
+	}
+
+	pages := uint((total + int64(opts.Limit) - 1) / int64(opts.Limit))
+
+	return &dtos.PaginatedResponse[models.User]{
+		Data:   data,
+		Total:  total,
+		Limit:  opts.Limit,
+		Offset: opts.Offset,
+		Pages:  pages,
+	}, nil
+}
+
+func (s *UserService) Delete(id string) (*dtos.UserResponse, error) {
+	user, err := s.FindUserById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.userRepo.Delete(id); err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
