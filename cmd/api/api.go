@@ -6,7 +6,7 @@ import (
 )
 
 func SetupApi(app *fiber.App, c *src.Container) {
-	api := app.Group("/api")
+	api := app.Group("/api/v1")
 
 	handlers := []func(fiber.Router){
 		c.UserHandler.RegisterUserRoutes,
