@@ -11,9 +11,6 @@ func Migrate(db *gorm.DB) {
 	err := db.AutoMigrate(
 		&models.User{},
 		&models.Project{},
-		&models.ProjectCollaborator{},
-		&models.ProjectInvite{},
-		&models.Room{},
 	)
 
 	if err != nil {
