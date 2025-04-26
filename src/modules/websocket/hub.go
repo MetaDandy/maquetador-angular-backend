@@ -25,7 +25,7 @@ func (h *Hub) Run() {
 			h.clients[client.pageID][client] = true
 			h.mu.Unlock()
 		case client := <-h.unregister:
-			h.mu.Unlock()
+			h.mu.Lock()
 			if conns := h.clients[client.pageID]; conns != nil {
 				delete(conns, client)
 				close(client.sendChan)

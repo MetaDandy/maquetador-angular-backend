@@ -12,7 +12,7 @@ func GenerateJwt(user_id, email string) (string, error) {
 	claims := token.Claims.(jwt.MapClaims)
 	claims["sub"] = user_id
 	claims["email"] = email
-	claims["exp"] = time.Now().Add(time.Hour * 24).Unix() // Token expira en 24 horas
+	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 
 	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 }
