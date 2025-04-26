@@ -3,15 +3,16 @@ package src
 import (
 	"github.com/MetaDandy/maquetador-angular-backend/config"
 	"github.com/MetaDandy/maquetador-angular-backend/src/handlers"
+	"github.com/MetaDandy/maquetador-angular-backend/src/modules/user"
 	"github.com/MetaDandy/maquetador-angular-backend/src/repository"
 	"github.com/MetaDandy/maquetador-angular-backend/src/services"
 )
 
 type Container struct {
 	// Users
-	UserRepo    *repository.UserRepository
-	UserService *services.UserService
-	UserHandler *handlers.UserHandler
+	UserRepo    *user.Repository
+	UserService *user.Service
+	UserHandler *user.Handler
 
 	// Project
 	ProjectRepo    *repository.ProjectRepositories
@@ -21,9 +22,9 @@ type Container struct {
 
 func SetupContainer() *Container {
 	// User
-	userRepo := repository.NewUserRepository(config.DB)
-	userService := services.NewUserService(userRepo)
-	userHandler := handlers.NewUserHandler(userService)
+	userRepo := user.NewRepository(config.DB)
+	userService := user.NewService(userRepo)
+	userHandler := user.NewHandler(userService)
 
 	// Project
 	projectRepo := repository.NewProjectRepositories(config.DB)

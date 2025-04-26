@@ -1,32 +1,31 @@
-package handlers
+package user
 
 import (
-	"github.com/MetaDandy/maquetador-angular-backend/pkg"
-	"github.com/MetaDandy/maquetador-angular-backend/src/dtos"
-	"github.com/MetaDandy/maquetador-angular-backend/src/services"
+	"github.com/MetaDandy/maquetador-angular-backend/helper"
 	"github.com/gofiber/fiber/v2"
 )
 
-type UserHandler struct {
-	userService *services.UserService
+type Handler struct {
+	service *Service
 }
 
-func NewUserHandler(userService *services.UserService) *UserHandler {
-	return &UserHandler{
-		userService: userService,
+func NewHandler(service *Service) *Handler {
+	return &Handler{
+		service: service,
 	}
 }
 
-func (h *UserHandler) RegisterUserRoutes(router fiber.Router) {
-	router.Post("/user/register", h.CreateUser)
-	router.Post("/login", h.Login)
-	router.Get("/", h.FindAll)
-	router.Get("/:id", h.FindById)
-	router.Delete("/:id", h.Delete)
+func (h *Handler) RegisterUserRoutes(router fiber.Router) {
+	grp := router.Group("/users")
+	grp.Post("/register", h.CreateUser)
+	grp.Post("/login", h.Login)
+	grp.Get("/", h.FindAll)
+	grp.Get("/:id", h.FindById)
+	grp.Delete("/:id", h.Delete)
 }
 
-func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
-	var req dtos.UserRequest
+func (h *Handler) CreateUser(c *fiber.Ctx) error {
+	var req UserRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid request body",
@@ -34,7 +33,7 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	user, err := h.userService.CreateUser(req)
+	user, err := h.service.CreateUser(req)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to create user",
@@ -48,10 +47,10 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 	})
 }
 
-func (h *UserHandler) FindAll(c *fiber.Ctx) error {
-	opts := pkg.NewFindAllOptionsFromQuery(c)
+func (h *Handler) FindAll(c *fiber.Ctx) error {
+	opts := helper.NewFindAllOptionsFromQuery(c)
 
-	users, err := h.userService.GetAllUsers(opts)
+	users, err := h.service.GetAllUsers(opts)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to obtein users",
@@ -62,9 +61,9 @@ func (h *UserHandler) FindAll(c *fiber.Ctx) error {
 	return c.JSON(users)
 }
 
-func (h *UserHandler) FindById(c *fiber.Ctx) error {
+func (h *Handler) FindById(c *fiber.Ctx) error {
 	id := c.Params("id")
-	user, err := h.userService.FindUserById(id)
+	user, err := h.service.FindUserById(id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to find user",
@@ -83,9 +82,9 @@ func (h *UserHandler) FindById(c *fiber.Ctx) error {
 	})
 }
 
-func (h *UserHandler) Delete(c *fiber.Ctx) error {
+func (h *Handler) Delete(c *fiber.Ctx) error {
 	id := c.Params("id")
-	user, err := h.userService.Delete(id)
+	user, err := h.service.Delete(id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to find user",
@@ -104,15 +103,15 @@ func (h *UserHandler) Delete(c *fiber.Ctx) error {
 	})
 }
 
-func (h *UserHandler) Login(c *fiber.Ctx) error {
-	var req dtos.LoginRequest
+func (h *Handler) Login(c *fiber.Ctx) error {
+	var req LoginRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid request body",
 		})
 	}
 
-	loginResponse, err := h.userService.Login(req)
+	loginResponse, err := h.service.Login(req)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Invalid credentials",

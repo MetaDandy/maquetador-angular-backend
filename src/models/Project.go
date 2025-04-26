@@ -14,8 +14,8 @@ type Project struct {
 	Description string         `json:"description"`
 	Content     datatypes.JSON `gorm:"type:jsonb"`
 	OwnerID     uuid.UUID      `json:"owner_id"`
-	CreatedAt   time.Time      `gorm:"not null;default:now()"`
-	UpdatedAt   time.Time      `gorm:"not null;default:now()"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
 
 	Owner User `gorm:"foreignKey:OwnerID" json:"owner"`

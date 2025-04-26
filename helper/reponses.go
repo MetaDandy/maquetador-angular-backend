@@ -1,14 +1,4 @@
-package dtos
-
-type FindAllDto struct {
-	OrderBy     string
-	Sort        string
-	Search      string
-	Limit       uint
-	Offset      uint
-	ShowDeleted bool
-	OnlyDeleted bool
-}
+package helper
 
 type PaginatedResponse[T any] struct {
 	Data   []T   `json:"data"`

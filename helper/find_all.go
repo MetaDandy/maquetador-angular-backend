@@ -1,21 +1,30 @@
-package pkg
+package helper
 
 import (
 	"strconv"
 
-	"github.com/MetaDandy/maquetador-angular-backend/src/dtos"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
-func NewFindAllOptionsFromQuery(c *fiber.Ctx) *dtos.FindAllDto {
+type FindAllDto struct {
+	OrderBy     string
+	Sort        string
+	Search      string
+	Limit       uint
+	Offset      uint
+	ShowDeleted bool
+	OnlyDeleted bool
+}
+
+func NewFindAllOptionsFromQuery(c *fiber.Ctx) *FindAllDto {
 	limitParam := c.Query("limit", "10")
 	offsetParam := c.Query("offset", "0")
 
 	limit, _ := strconv.ParseUint(limitParam, 10, 32)
 	offset, _ := strconv.ParseUint(offsetParam, 10, 32)
 
-	return &dtos.FindAllDto{
+	return &FindAllDto{
 		OrderBy:     c.Query("order_by", "created_at"),
 		Sort:        c.Query("sort", "asc"),
 		Search:      c.Query("search", ""),
@@ -26,7 +35,7 @@ func NewFindAllOptionsFromQuery(c *fiber.Ctx) *dtos.FindAllDto {
 	}
 }
 
-func ApplyFindAllOptions(query *gorm.DB, opts *dtos.FindAllDto) (*gorm.DB, int64) {
+func ApplyFindAllOptions(query *gorm.DB, opts *FindAllDto) (*gorm.DB, int64) {
 	var total int64
 
 	if opts == nil {
