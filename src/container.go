@@ -26,7 +26,7 @@ func SetupContainer() *Container {
 
 	// Project
 	projectRepo := project.NewRepository(config.DB)
-	projectService := project.NewService(projectRepo, userService)
+	projectService := project.NewService(projectRepo, userRepo)
 	projectHandler := project.NewHandler(projectService)
 
 	return &Container{

@@ -21,12 +21,18 @@ func (r *Repository) Create(user *models.User) error {
 func (r *Repository) FindByEmail(email string) (*models.User, error) {
 	var user models.User
 	err := r.db.First(&user, "email = ?", email).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
 	return &user, err
 }
 
 func (r *Repository) FindById(id string) (*models.User, error) {
 	var user models.User
 	err := r.db.First(&user, "id = ?", id).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
 	return &user, err
 }
 

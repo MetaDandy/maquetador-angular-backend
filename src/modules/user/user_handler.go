@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/MetaDandy/maquetador-angular-backend/helper"
+	"github.com/MetaDandy/maquetador-angular-backend/middleware"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -20,8 +21,10 @@ func (h *Handler) RegisterUserRoutes(router fiber.Router) {
 	grp.Post("/register", h.CreateUser)
 	grp.Post("/login", h.Login)
 	grp.Get("/", h.FindAll)
-	grp.Get("/:id", h.FindById)
-	grp.Delete("/:id", h.Delete)
+
+	pgrp := router.Group("/users", middleware.JwtMiddleware())
+	pgrp.Get("/:id", h.FindById)
+	pgrp.Delete("/:id", h.Delete)
 }
 
 func (h *Handler) CreateUser(c *fiber.Ctx) error {
@@ -33,7 +36,7 @@ func (h *Handler) CreateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	user, err := h.service.CreateUser(req)
+	user, token, err := h.service.CreateUser(req)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to create user",
@@ -44,6 +47,7 @@ func (h *Handler) CreateUser(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "User created successfully",
 		"data":    user,
+		"token":   token.Token,
 	})
 }
 

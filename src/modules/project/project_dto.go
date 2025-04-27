@@ -26,6 +26,7 @@ type ProjectResponse struct {
 	ID          string            `json:"id"`
 	Title       string            `json:"title" validate:"required"`
 	Description string            `json:"description"`
+	Content     datatypes.JSON    `json:"content"`
 	CreatedAt   time.Time         `json:"created_at"`
 	UpdatedAt   time.Time         `json:"updated_at"`
 	DeletedAt   *time.Time        `json:"deleted_at"`
@@ -43,6 +44,7 @@ func ProjectToDTO(u *models.Project) ProjectResponse {
 		ID:          u.ID.String(),
 		Title:       u.Title,
 		Description: u.Description,
+		Content:     u.Content,
 		Owner:       user.UserToDTO(&u.Owner),
 		CreatedAt:   u.CreatedAt,
 		UpdatedAt:   u.UpdatedAt,

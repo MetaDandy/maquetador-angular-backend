@@ -2,6 +2,7 @@ package project
 
 import (
 	"github.com/MetaDandy/maquetador-angular-backend/helper"
+	"github.com/MetaDandy/maquetador-angular-backend/middleware"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -16,11 +17,12 @@ func NewHandler(svc *Service) *Handler {
 }
 
 func (h *Handler) RegisterProjectRoutes(router fiber.Router) {
-	grp := router.Group("/projects")
-	grp.Post("/create", h.CreateProject)
+	grp := router.Group("/projects", middleware.JwtMiddleware())
+	grp.Post("/", h.CreateProject)
 	grp.Get("/", h.FindAll)
 	grp.Get("/owner/:id", h.FindAllProjectsByUser)
 	grp.Get("/:id", h.FindById)
+	grp.Patch("/:id", h.Update)
 	grp.Delete("/:id", h.Delete)
 }
 
@@ -41,6 +43,28 @@ func (h *Handler) CreateProject(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "Project created successfully",
+		"data":    project,
+	})
+}
+
+func (h *Handler) Update(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var input ProjectUpdate
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	project, err := h.svc.UpdateProject(id, input)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to update project",
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"message": "Project updated successfully",
 		"data":    project,
 	})
 }

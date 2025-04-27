@@ -2,10 +2,12 @@ package user
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/MetaDandy/maquetador-angular-backend/helper"
 	"github.com/MetaDandy/maquetador-angular-backend/src/models"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type Service struct {
@@ -16,11 +18,22 @@ func NewService(repo *Repository) *Service {
 	return &Service{repo: repo}
 }
 
-func (s *Service) CreateUser(req UserRequest) (*UserResponse, error) {
+func (s *Service) CreateUser(req UserRequest) (*UserResponse, *LoginResponse, error) {
+	existingUser, err := s.repo.FindByEmail(req.Email)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		log.Println("Error al buscar usuario:", err)
+		return nil, nil, err
+	}
+	if existingUser != nil {
+		log.Printf("Correo electrónico en uso: %v\n", existingUser)
+		return nil, nil, fmt.Errorf("Correo electrónico en uso")
+	}
+
 	id := uuid.New()
 	hashedPassword, err := helper.HashPassword(req.Password)
 	if err != nil {
-		return nil, err
+		log.Printf("Error al hashear la contraseña: %v\n", err)
+		return nil, nil, err
 	}
 
 	user := &models.User{
@@ -31,11 +44,20 @@ func (s *Service) CreateUser(req UserRequest) (*UserResponse, error) {
 	}
 
 	if err := s.repo.Create(user); err != nil {
-		return nil, err
+		log.Printf("Error al crear el usuario en la base de datos: %v\n", err)
+		return nil, nil, err
+	}
+
+	token, err := helper.GenerateJwt(user.ID.String(), string(user.Email))
+	if err != nil {
+		log.Printf("Error al generar el token JWT: %v\n", err)
+		return nil, nil, err
 	}
 
 	dto := UserToDTO(user)
-	return &dto, nil
+	return &dto, &LoginResponse{
+		Token: token,
+	}, nil
 }
 
 func (s *Service) Login(req LoginRequest) (*LoginResponse, error) {
@@ -49,7 +71,6 @@ func (s *Service) Login(req LoginRequest) (*LoginResponse, error) {
 	}
 
 	token, err := helper.GenerateJwt(user.ID.String(), string(user.Email))
-
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +78,6 @@ func (s *Service) Login(req LoginRequest) (*LoginResponse, error) {
 	return &LoginResponse{
 		Token: token,
 	}, nil
-
 }
 
 func (s *Service) FindUserById(id string) (*UserResponse, error) {

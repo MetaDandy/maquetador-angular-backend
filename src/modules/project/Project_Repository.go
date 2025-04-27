@@ -20,19 +20,25 @@ func (r *Repository) Create(project *models.Project) error {
 
 func (r *Repository) FindByID(id string) (*models.Project, error) {
 	var project models.Project
-	err := r.db.First(&project, "id = ?", id).Error
+	err := r.db.Preload("Owner").First(&project, "id = ?", id).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
 	return &project, err
 }
 
 func (r *Repository) FindByTitles(title string) (*models.Project, error) {
 	var project models.Project
-	err := r.db.First(&project, "title = ?", title).Error
+	err := r.db.Preload("Owner").First(&project, "title = ?", title).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
 	return &project, err
 }
 
 func (c *Repository) FindAll(opts *helper.FindAllDto) ([]models.Project, int64, error) {
 	var project []models.Project
-	query := c.db.Model(models.Project{})
+	query := c.db.Preload("Owner").Model(models.Project{})
 	var total int64
 	query, total = helper.ApplyFindAllOptions(query, opts)
 
@@ -42,7 +48,7 @@ func (c *Repository) FindAll(opts *helper.FindAllDto) ([]models.Project, int64, 
 
 func (r *Repository) FindAllByUserID(ownerID string, opts *helper.FindAllDto) ([]models.Project, int64, error) {
 	var projects []models.Project
-	query := r.db.Where("owner_id = ?", ownerID).Model(&models.Project{})
+	query := r.db.Preload("Owner").Where("owner_id = ?", ownerID).Model(&models.Project{})
 	var total int64
 	query, total = helper.ApplyFindAllOptions(query, opts)
 

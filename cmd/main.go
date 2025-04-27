@@ -18,7 +18,7 @@ func main() {
 	app.Use(middleware.Logger())
 
 	app.Get("/", func(ctx *fiber.Ctx) error {
-		return ctx.SendString("Hello, API")
+		return ctx.SendString("Aloha")
 	})
 
 	websocket.InitializeWebsocket(app)
