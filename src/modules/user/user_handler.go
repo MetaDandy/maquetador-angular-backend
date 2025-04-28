@@ -32,7 +32,7 @@ func (h *Handler) CreateUser(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid request body",
-			"err":   err,
+			"err":   err.Error(),
 		})
 	}
 
