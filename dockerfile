@@ -3,11 +3,12 @@ FROM golang:1.24.1-alpine
 WORKDIR /app
 
 RUN apk add --no-cache git gcc musl-dev
-RUN go install github.com/air-verse/air@latest
 
 COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
 
-CMD ["air", "-c", ".air.toml"]
+RUN go build -tags netgo -ldflags '-s -w' -o app
+
+CMD ["./app"]
