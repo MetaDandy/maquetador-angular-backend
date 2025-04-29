@@ -21,6 +21,11 @@ func Load() {
 		log.Println("Error loading .env file")
 	}
 
+	Port = os.Getenv("PORT")
+	if Port == "" {
+		Port = "3000"
+	}
+
 	maxRetries := 10
 	for i := 0; i < maxRetries; i++ {
 		dsn := os.Getenv("DATABASE_URL")
