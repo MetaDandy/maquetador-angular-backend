@@ -8,8 +8,5 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - ALLOW_ORIGINS=${ALLOW_ORIGINS}
       - JWT_SECRET=${JWT_SECRET}
-      - GOFLAGS=-buildvcs=false
     volumes:
       - .:/app
-      - /go/pkg/mod
-      - ./tmp:/app/tmp
